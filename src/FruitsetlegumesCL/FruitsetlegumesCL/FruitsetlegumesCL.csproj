@@ -60,12 +60,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\..\KozzionCSharp\KozzionCSharp\KozzionCore\KozzionCore.csproj">
-      <Project>{8102cced-b941-4766-aff8-7c2282506932}</Project>
-      <Name>KozzionCore</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
