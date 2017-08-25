@@ -2,12 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FruitsetlegumesCL.Method
 {
-    public class MethodIntersect : IMethod
+    public class MethodIntersect : IModelBuilder
     {
         public AModel Create(IList<string> labels, IList<IList<TokenPage>> data)
         {

@@ -1,22 +1,19 @@
 ﻿using FruitsetlegumesCL.DataImport;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FruitsetlegumesCL.Method
 {
     public class ModelBayes : AModel
     {
-        private IList<double> _Prior;
-        private IList<Dictionary<string,double>> _LogLikelyhoods;
+        private IList<double> _prior;
+        private IList<Dictionary<string,double>> _logLikelyhoods;
 
         public ModelBayes(IList<string> labels, IList<double> prior, IList<Dictionary<string, double>> logLikelyhoods)
             : base(labels)
         {
-            _Prior = prior;
-            _LogLikelyhoods = logLikelyhoods;
+            _prior = prior;
+            _logLikelyhoods = logLikelyhoods;
         }
 
         public override List<TypeScore> GetScores(TokenPage page)
@@ -24,7 +21,7 @@ namespace FruitsetlegumesCL.Method
             List<TypeScore> list = new List<TypeScore>();
             for (int index = 0; index < Labels.Count; index++)
             {
-                list.Add(new TypeScore(Labels[index], CreateScore(_Prior[index],_LogLikelyhoods[index], page.Tokens)));
+                list.Add(new TypeScore(Labels[index], CreateScore(_prior[index],_logLikelyhoods[index], page.Tokens)));
             }
             return list;
         }
@@ -36,9 +33,7 @@ namespace FruitsetlegumesCL.Method
 
             foreach (var item in tokens)
             {
-                double likelyhood;
-
-                if (logLikelyhoods.TryGetValue(item, out likelyhood))
+                if (logLikelyhoods.TryGetValue(item, out double likelyhood))
                 {
                     logLikelihood += likelyhood;
                 }

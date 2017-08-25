@@ -2,70 +2,82 @@
 using FruitsetlegumesCL.Method;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FruitsetlegumesCL
 {
-    class Program
+    public static class Program
     {
+        private const string fruit = "fruit";
+        private const string vegetable = "vegetable";
+
         static void Main(string[] args)
         {
-            string fruit_page = "https://en.wikipedia.org/wiki/List_of_culinary_fruits";
-            string vegetable_page = "https://en.wikipedia.org/wiki/List_of_vegetables";
+            const string fruitPage = "https://en.wikipedia.org/wiki/List_of_culinary_fruits";
+            const string vegetablePage = "https://en.wikipedia.org/wiki/List_of_vegetables";
+            const string cocktailPage = "https://en.wikipedia.org/wiki/List_of_cocktails";
 
+            var import = new ImportWiki();
+            var fruit_tokens = import.ImportRecursive(fruitPage);
+            var vegetable_tokens = import.ImportRecursive(vegetablePage);
+            var cocktailTokens = import.ImportRecursive(cocktailPage);
 
-            ImportWiki import = new ImportWiki();
-            var fruit_tokens = import.ImportRecursive(fruit_page);
-            var vegetable_tokens = import.ImportRecursive(vegetable_page);
-
-            var fruitExpectations = fruit_tokens.Select(page => new TokenPageExpectation(page, "fruit"));
-            var vegetableExpectations = vegetable_tokens.Select(page => new TokenPageExpectation(page, "vegetable"));
+            var fruitExpectations = fruit_tokens.Select(page => new TokenPageExpectation(page, fruit));
+            var vegetableExpectations = vegetable_tokens.Select(page => new TokenPageExpectation(page, vegetable));
             var allExpectations = fruitExpectations.Concat(vegetableExpectations);
 
-            var label = new string[] { "fruit", "vegetable" };
+            var label = new string[] { fruit, vegetable };
             var data = new IList<TokenPage>[] { fruit_tokens, vegetable_tokens };
 
-            AModel model_0 = new MethodIntersect().Create(label, data);
-            int [,] matrix_0  = model_0.Test(allExpectations);
-            Console.WriteLine($"{"",-15} {"fuit",15} {"vegetable",15}");
-            Console.WriteLine($"{"fuit",-15} {matrix_0[0,0],15} {matrix_0[0,1],15}");
-            Console.WriteLine($"{"vegetable",-15} {matrix_0[1,0],15} {matrix_0[1, 1],15}");
-            Console.WriteLine();
+            RunModel(new MethodIntersect(), label, data, allExpectations);
+            RunModel(new MethodBayes(), label, data, allExpectations);
+            var bayesGuass = RunModel(new MethodBayesGauss(1e-3), label, data, allExpectations);
 
-
-            AModel model_1 = new MethodBayes().Create(label, data);
-            int[,] matrix_1 = model_1.Test(allExpectations);
-            Console.WriteLine($"{"",-15} {"fuit",15} {"vegetable",15}");
-            Console.WriteLine($"{"fuit",-15} {matrix_1[0, 0],15} {matrix_1[0, 1],15}");
-            Console.WriteLine($"{"vegetable",-15} {matrix_1[1, 0],15} {matrix_1[1, 1],15}");
-            //Console.WriteLine($"{"Name",-60}{"Fruit Score",15}{"Veg Score",15} {"Categorization",-15}{"Actual",-20}");
-
-            //foreach (var page in fruit_tokens)
-            //{
-            //    PrintPageInfo(page, fruit_set, vegetable_set, "fruit");
-            //}
-
-            //foreach (var page in vegetable_tokens)
-            //{
-            //    PrintPageInfo(page, fruit_set, vegetable_set, "vegetable");
-            //}
+            using (var writer = new StreamWriter("cocktails.csv"))
+            {
+                WritePageInfos(writer, cocktailTokens, bayesGuass);
+            }
 
             Console.ReadLine();
         }
 
-        //private static void PrintPageInfo(TokenPage page, HashSet<string> fruits, HashSet<string> veggies, string expected)
-        //{
-        //    var name = page.Name;
-        //    var fruitScore = CreateScore(fruits, page.Map.Keys);
-        //    var vegScore = CreateScore(veggies, page.Map.Keys);
-        //    var category = fruitScore > vegScore ? "fruit" : vegScore > fruitScore ? "vegetable" : "unknown";
-        //    Console.WriteLine($"{name,-60}{fruitScore,15}{vegScore,15} {category,-15}{expected,-20}");
-        //}
+        private static AModel RunModel(
+            IModelBuilder method,
+            string[] labels,
+            IList<TokenPage>[] data,
+            IEnumerable<TokenPageExpectation> expectations)
+        {
+            var model = method.Create(labels, data);
+            var matrix = model.Test(expectations);
 
+            Console.WriteLine($"{"",-15} {fruit,15} {vegetable,15}");
+            Console.WriteLine($"{fruit,-15} {matrix[0, 0],15} {matrix[0, 1],15}");
+            Console.WriteLine($"{vegetable,-15} {matrix[1, 0],15} {matrix[1, 1],15}");
+            Console.WriteLine();
 
+            return model;
+        }
 
+        private static void WritePageInfos(TextWriter writer, IEnumerable<TokenPage> pages, AModel model)
+        {
+            writer.WriteLine("Page;Label");
+
+            foreach (var page in pages)
+            {
+                PrintPageInfo(writer, page, model);
+            }
+        }
+
+        private static void PrintPageInfo(TextWriter writer, TokenPage page, AModel model)
+        {
+            var name = page.Name;
+            var scores = model.GetScores(page);
+
+            var maxScore = scores.Max(s => s.Score);
+            var label = scores.First(s => s.Score == maxScore).Type;
+
+            writer.WriteLine($"{name};{label}");
+        }
     }
 }

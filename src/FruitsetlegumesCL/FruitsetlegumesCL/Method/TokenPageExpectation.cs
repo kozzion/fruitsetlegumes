@@ -5,12 +5,12 @@ namespace FruitsetlegumesCL.Method
     public struct TokenPageExpectation
     {
         public TokenPage Page { get; }
-        public string Expectation { get; }
+        public string ExpectedCategory { get; }
 
-        public TokenPageExpectation(TokenPage page, string expectation)
+        public TokenPageExpectation(TokenPage page, string expectedCategory)
         {
             Page = page;
-            Expectation = expectation;
+            ExpectedCategory = expectedCategory;
         }
     }
 }

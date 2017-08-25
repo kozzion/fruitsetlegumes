@@ -2,12 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FruitsetlegumesCL.Method
 {
-    public class MethodBayes : IMethod
+    public class MethodBayes : IModelBuilder
     {
         public AModel Create(IList<string> labels, IList<IList<TokenPage>> data)
         {
@@ -16,9 +14,8 @@ namespace FruitsetlegumesCL.Method
                 throw new InvalidOperationException();
             }
 
+            var logLikelyhoods = new List<Dictionary<string, double>>();
 
-
-            IList<Dictionary<string, double>> logLikelyhoods = new List<Dictionary<string, double>>();
             foreach (var typeClass in data)
             {
                 var total = 0.0;
@@ -39,7 +36,8 @@ namespace FruitsetlegumesCL.Method
                 logLikelyhoods.Add(logLikelyhood);
             }
 
-            var priors = Enumerable.Repeat(0.0, data.Count).ToList(); //TODO could use priors
+            var totalCount = data.Sum(d => d.Count);
+            var priors = data.Select(d => d.Count / (double)totalCount).ToList();
 
             return new ModelBayes(labels, priors, logLikelyhoods);
         }

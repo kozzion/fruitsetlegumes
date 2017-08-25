@@ -7,17 +7,18 @@ namespace FruitsetlegumesCL.DataImport
     {
         public static IEnumerable<string> GetTokens(string html)
         {
-            List<string> result_0 = ParseTag("<p>", "</p>", html);
-            List<string> result_1 = ExcludeTag("<", ">", result_0);
-            List<string> result_2 = ExcludeTag("[", "]", result_1);
+            var clean =
+                ExcludeTag("[", "]",
+                ExcludeTag("<", ">",
+                ParseTag("<p>", "</p>", html)));
 
-            var re = new Regex("\\w+", RegexOptions.Compiled);
+            var wordRegex = new Regex("\\w+", RegexOptions.Compiled);
 
             var words = new List<string>();
 
-            foreach (var line in result_2)
+            foreach (var line in clean)
             {
-                var matches = re.Matches(line);
+                var matches = wordRegex.Matches(line);
 
                 foreach (Match match in matches)
                 {

@@ -1,9 +1,5 @@
 ﻿using FruitsetlegumesCL.DataImport;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FruitsetlegumesCL.Method
 {
@@ -16,7 +12,6 @@ namespace FruitsetlegumesCL.Method
         {
             _hashSets = hashSets;
         }
-
 
         public override List<TypeScore> GetScores(TokenPage page)
         {

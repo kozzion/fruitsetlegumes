@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace FruitsetlegumesCL.DataImport
 {
     public class ImportWiki
     {
-        private const string map_path = @"D:\Projects\Fruitsetlegumes\backup";
+        private const string CacheDirectory = "cache";
+        private static readonly string CachePath = Path.Combine(Environment.CurrentDirectory, CacheDirectory);
 
         WebClient client;
 
@@ -19,9 +18,9 @@ namespace FruitsetlegumesCL.DataImport
         {
             client = new WebClient();
 
-            if (!Directory.Exists(map_path))
+            if (!Directory.Exists(CachePath))
             {
-                Directory.CreateDirectory(map_path);
+                Directory.CreateDirectory(CachePath);
             }
         }
 
@@ -29,13 +28,20 @@ namespace FruitsetlegumesCL.DataImport
 
         private static string GetName(string url)
         {
+            const string wikiBaseUrl = "https://en.wikipedia.org/wiki/";
+
+            if (url.StartsWith(wikiBaseUrl))
+            {
+                url = url.Substring(wikiBaseUrl.Length);
+            }
+
             return FileNameRegex.Replace(url, "_");
         }
 
         public HtmlPage GetPage(string url)
         {
             var name = GetName(url);
-            var path = Path.Combine(map_path, name);
+            var path = Path.Combine(CachePath, name);
 
             string html;
 
@@ -103,8 +109,6 @@ namespace FruitsetlegumesCL.DataImport
             return urls;
         }
 
-
-
         private List<string> GetUrls(string page_url)
         {
             var page = GetPage(page_url);
@@ -114,6 +118,7 @@ namespace FruitsetlegumesCL.DataImport
             string item_close = "</li>";
 
             int current_index = 0;
+
             while (true)
             {
                 int item_open_index = html.IndexOf(item_open, current_index);
@@ -145,15 +150,13 @@ namespace FruitsetlegumesCL.DataImport
 
 
                             string value = item.Substring(ref_open_index, ref_close_index - ref_open_index);
+
                             if (6 < value.Length && value.Substring(0, 6).Equals("/wiki/"))
                             {
 
                                 urls.Add("https://en.wikipedia.org" + value);
                             }
                         }
-
-
-
                     }
                 }
             }
