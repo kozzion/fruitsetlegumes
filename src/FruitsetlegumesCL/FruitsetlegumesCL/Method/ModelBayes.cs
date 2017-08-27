@@ -6,12 +6,14 @@ namespace FruitsetlegumesCL.Method
 {
     public class ModelBayes : AModel
     {
+        private double _epsilonLn;
         private IList<double> _prior;
         private IList<Dictionary<string,double>> _logLikelyhoods;
 
-        public ModelBayes(IList<string> labels, IList<double> prior, IList<Dictionary<string, double>> logLikelyhoods)
+        public ModelBayes(IList<string> labels, double epsilon, IList<double> prior, IList<Dictionary<string, double>> logLikelyhoods)
             : base(labels)
         {
+            _epsilonLn = Math.Log(epsilon);
             _prior = prior;
             _logLikelyhoods = logLikelyhoods;
         }
@@ -29,7 +31,6 @@ namespace FruitsetlegumesCL.Method
         public double CreateScore(double prior, Dictionary<string, double> logLikelyhoods, IEnumerable<string> tokens)
         {
             double logLikelihood = 0;
-            var epsilon = Math.Log(1.0 / logLikelyhoods.Keys.Count);
 
             foreach (var item in tokens)
             {
@@ -39,7 +40,7 @@ namespace FruitsetlegumesCL.Method
                 }
                 else
                 {
-                    logLikelihood += epsilon;
+                    logLikelihood += _epsilonLn;
                 }
             }
             return logLikelihood;

@@ -6,14 +6,14 @@ namespace FruitsetlegumesCL.Method
 {
     internal class ModelBayesGauss : AModel
     {
-        private double _epsilon;
+        private double _epsilonLn;
         private List<double> _priors;
         private List<Dictionary<string, GaussEstimate>> _estimates;
 
         public ModelBayesGauss(IList<string> labels, double epsilon, List<double> priors, List<Dictionary<string, GaussEstimate>> estimates)
             : base(labels)
         {
-            _epsilon = epsilon;
+            _epsilonLn = Math.Log(epsilon);
             _priors = priors;
             _estimates = estimates;
         }
@@ -42,11 +42,11 @@ namespace FruitsetlegumesCL.Method
                 if (estimates.TryGetValue(token, out var estimate))
                 {
                     var density = estimate.GetDensityLn(fraction);
-                    logLikelihood += double.IsNaN(density) ? _epsilon : density;
+                    logLikelihood += double.IsNaN(density) ? _epsilonLn : density;
                 }
                 else
                 {
-                    logLikelihood += _epsilon;
+                    logLikelihood += _epsilonLn;
                 }
             }
 

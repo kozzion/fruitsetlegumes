@@ -58,16 +58,28 @@ namespace FruitsetlegumesCL.DataImport
             return new HtmlPage(name, html);
         }
 
-        public TokenPage Import(string page_url)
+        public TokenPage Import(string pageUrl)
         {
-            var htmlPage = GetPage(page_url);
+            var htmlPage = GetPage(pageUrl);
             return htmlPage.ToTokenPage();
         }
 
-        public List<TokenPage> ImportRecursive(string cathegory_url)
+        public FeaturePage Import(string pageUrl, List<string> selectedTokens)
         {
-            List<string> page_urls = Spider(cathegory_url);
-            return page_urls.Select(Import).ToList();
+            var htmlPage = GetPage(pageUrl);
+            return htmlPage.ToTokenPage().ToFeaturePage(selectedTokens);
+        }
+
+        public List<TokenPage> ImportRecursive(string categoryUrl)
+        {
+            List<string> pageUrls = Spider(categoryUrl);
+            return pageUrls.Select(Import).ToList();
+        }
+
+        public List<FeaturePage> ImportRecursive(string categoryUrl, List<string> selectedTokens)
+        {
+            var pageUrls = Spider(categoryUrl);
+            return pageUrls.Select(url => Import(url, selectedTokens)).ToList();
         }
 
         private static List<string> Spider(string cathegory_url)

@@ -7,6 +7,13 @@ namespace FruitsetlegumesCL.Method
 {
     public class MethodBayes : IModelBuilder
     {
+        private double _epsilon;
+
+        public MethodBayes(double epsilon)
+        {
+            _epsilon = epsilon;
+        }
+
         public AModel Create(IList<string> labels, IList<IList<TokenPage>> data)
         {
             if (labels.Count != data.Count)
@@ -39,7 +46,7 @@ namespace FruitsetlegumesCL.Method
             var totalCount = data.Sum(d => d.Count);
             var priors = data.Select(d => d.Count / (double)totalCount).ToList();
 
-            return new ModelBayes(labels, priors, logLikelyhoods);
+            return new ModelBayes(labels, _epsilon, priors, logLikelyhoods);
         }
     }
 }
